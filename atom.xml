@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title>Andreas Arledals blog</title>
+  <link href="http://andreasarledal.github.com/atom.xml" rel="self"/>
+  <link href="http://andreasarledal.github.com/"/>
+  <updated>2011-08-18T18:52:03+02:00</updated>
+  <id>http://andreasarledal.github.com/</id>
+  <author>
+    <name>Andreas Arledal</name>
+    
+  </author>
+
+  
+</feed>
