@@ -1,11 +1,14 @@
 ---
 layout: post
-title: "Grails mongoDB - Collections of DBRefs Inside an Embedded Collection"
+title: "Grails mongoDB - Collections of DBRefs inside an Embedded Collection"
 date: 2011-11-15 09:39
 comments: true
 categories: [Grails, mongoDB]
 ---
-Using mongodb and embedded collections works fine with the official mongodb-plugin as long as you know the caveats. What isn't working though is to have your embedded collection referencing another collection. I needed to solve this and had to turn to the Low-level API to get it working. Here's a simple example where a building has many offices and the offices has companies, but the companies need to be in an own collection since we need to query them specificaly.
+I'm working on a project where we're migrating from MySQL to mongoDB. One of the reasons for the switch is that the use of embedded collections will simplify our model and make it more efficient. The official mongodb-plugin (1.0.0.RC1) has some problems before it will be ready for production though. One of the problems is that having an embedded collection referencing another collection isn't possible with GORM ([GPMONGODB-92](http://jira.grails.org/browse/GPMONGODB-92 "Associations in an embedded instance should not be forcibly embedded as well")). The workaround is to use the Low-level API instead of GORM. Here's a simple example where a building has many offices and the offices has companies, but the companies need to be in an own collection since we need the possibility to query them specificaly.
+
+*Only tested with Grails 2.0.0.RC1 and mongodb plugin 1.0.0.RC1*
+
 {% codeblock Person lang:groovy %}
 import groovy.transform.EqualsAndHashCode
 import org.bson.types.ObjectId
@@ -13,12 +16,14 @@ import org.bson.types.ObjectId
 @EqualsAndHashCode
 class Building implements Serializable {
 	
-	static embedded = ['offices']
-	
-	ObjectId id
-	String name
-	List<Office> offices
-	
+  static mapWith = 'mongo'	
+  
+  static embedded = ['offices']
+  
+  ObjectId id
+  String name
+  List<Office> offices
+  
 }
 {% endcodeblock %}
 
@@ -28,12 +33,10 @@ import com.mongodb.DBRef
 
 @EqualsAndHashCode
 class Office implements Serializable {
-	
-	static embedded = ['companies']
-		
-	String name
-	List<DBRef> companies
-		
+      
+  String name
+  List<DBRef> companies
+      
 }
 {% endcodeblock %}
 
@@ -43,14 +46,16 @@ import org.bson.types.ObjectId
 
 @EqualsAndHashCode
 class Company implements Serializable {
-			
-	ObjectId id
-	String name
 	
+  static mapWith = 'mongo'
+          
+  ObjectId id
+  String name
+  
 }
 {% endcodeblock %}
 
-{% codeblock Testfile lang:groovy %}
+{% codeblock Testscript lang:groovy %}
 import com.mongodb.DBRef
 import com.gmongo.GMongo
 
@@ -59,34 +64,32 @@ def mongo = new GMongo("127.0.0.1", 27017)
 def db = mongo.getDB("foo")
 
 // Create a building 
-def building = new Building(name: "Stockholm business centre", offices: [])
+def building = new Building(name: "Stockholm business centre", offices: []).save()
 
-// And someone elses office
-building.offices << new Office(name: "Bill Gates not so cool workplace")
+// Add someone elses office
+building.offices << new Office(name: "Bill Gates not so cool workplace", companies: [])
 // Add my office
-building.offices << new Office(name: "Andreas's awesome workplace")
-building.save()
+building.offices << new Office(name: "Andreas awesome workplace", companies: [])
+building.save(flush: true)
 
 // Create a company
-def company = new Company(name: "Andreas incorporated").save()
+def company = new Company(name: "Andreas inc").save()
 // Get the reference
 def companyRef = new DBRef(db, "company", company.id)
 
 // Add company to office. 
-db.building.update([_id: building.id, 'offices.name': "Andreas's awesome workplace"], [$set: ['offices.$.companies': [companyRef]]])
+Building.collection.update(['_id': building.id, 'offices.name': 'Andreas awesome workplace'], [$set: ['offices.$.companies': [companyRef]]])
 
 
 // QUERYING
 
-// Since the embedded collection doesn't have an id, find it's index in the list.
+// Since the embedded collection doesn't have an identifier, find it's index in the list.
 def myOfficeIndex = building.offices.findIndexOf { it.name == "Andreas's awesome workplace"}
 
 // The DBRef isn't available in GORM even though it's persisted
-building.refresh()
-assert building.offices[myOfficeIndex].companies == null
+assert building.offices[myOfficeIndex].companies == []
 
 // Finding companies through the embedded collection using low level api.
-def myOfficeCompanies = db.building.findOne(_id: building.id).offices[myOfficeIndex].companies
-assert company.id in myOfficeCompanies
-
+def myOfficeCompanies = Building.collection.findOne('_id': building.id).offices[myOfficeIndex].companies
+assert company.id in myOfficeCompanies*.id
 {% endcodeblock %}
