@@ -6,7 +6,7 @@ comments: true
 categories: [Grails, mongoDB]
 ---
 I'm working on a project where we're migrating from MySQL to mongoDB. One of the reasons for the switch is that the use of embedded collections will simplify our model and make it more efficient. The official mongodb-plugin (1.0.0.RC1) has some problems before it will be ready for production though. One of the problems is that having an embedded collection referencing another collection isn't possible with GORM ([GPMONGODB-92](http://jira.grails.org/browse/GPMONGODB-92 "Associations in an embedded instance should not be forcibly embedded as well")). The workaround is to use the Low-level API instead of GORM. Here's a simple example where a building has many offices and the offices has companies, but the companies need to be in an own collection since we need the possibility to query them specificaly.
-
+<!--more-->
 *Only tested with Grails 2.0.0.RC1 and mongodb plugin 1.0.0.RC1*
 
 {% codeblock Person lang:groovy %}
