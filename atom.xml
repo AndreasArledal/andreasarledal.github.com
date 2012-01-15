@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Andreas Arledal]]></title>
+  <link href="http://andreasarledal.github.com/atom.xml" rel="self"/>
+  <link href="http://andreasarledal.github.com/"/>
+  <updated>2012-01-15T12:12:19+01:00</updated>
+  <id>http://andreasarledal.github.com/</id>
+  <author>
+    <name><![CDATA[Andreas Arledal]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Gr8 expectations]]></title>
+    <link href="http://andreasarledal.github.com/blog/2012/01/15/gr8-expectations/"/>
+    <updated>2012-01-15T10:27:00+01:00</updated>
+    <id>http://andreasarledal.github.com/blog/2012/01/15/gr8-expectations</id>
+    <content type="html"><![CDATA[<p>It&#8217;s a little late for new years resolutions, but I have some promises to myself for this year strongly connected to this blog and my life as a developer. One of my biggest goals for the year is to take the next step in being a more active contributor to the groovy and grails community. To put the pressure on myself I decided to share those goals here, so here they are:</p>
+
+<!--more-->
+
+
+<h2>Be active on the grails mailing list</h2>
+
+<p>Up until now I haven&#8217;t been that active on the mailing list, and I really don&#8217;t know why that is. I&#8217;m a frequent reader and it has been of great help many times. From now on I will try to answer at least one question everyother week and ask questions for all problems I can&#8217;t find a quick answer for.</p>
+
+<h2>Blog and tweet more</h2>
+
+<p>I&#8217;ve started a couple of blogs during the years but I have never really got up to speed with blogging any time. This is something I really would like to change. So, my promise is to write at least one blog post every month about something related to Groovy/Grails.</p>
+
+<h2>Speaking at conferences</h2>
+
+<p>In december last year gave my first presentation ever on a conference at the Groovy and Grails exchange. I think I did ok and learned a lot from the experience. I feel that I have a lot to share and I&#8217;m not short of ideas for presentations. My goal is to speak at at least 2 conferences 2012 about at least 2 topics. The gr8conf call for papers is open and I have at least two talk proposals in the making for it.</p>
+
+<h2>Advocating Groovy more active in Sweden</h2>
+
+<p>3 years ago me and <a href="https://twitter.com/#!/xlson" title="@xlson">Leonard Axelsson</a> founded SweGUG and we&#8217;ve had a handful of meetings since with between 8 and 20 attendees. Leonard has done a great job doing most work with organizing thoose meetings. For 2012 I will try to take a more active part in that again. I also hope that we will find someone more who would like to take an active part in this. My personal goal for SweGUG is that we should have at least 5 meeting during the year with one meeting with at least 30 attendees.</p>
+
+<p>With the help of my employer <a href="http://www.find-out.se" title="FindOut Technologies">FindOut Technologies</a> I will try to give a free seminar about grails.</p>
+
+<h2>Contributing</h2>
+
+<p>I&#8217;ve written a few grails plugins for internal use during the years, but besides doing the CSS for the navigation plugin I&#8217;ve never contributed anything that&#8217;s been made public. This year I will try to write one public plugin.</p>
+
+<p>I will also try to contribute to the grails documentation whenever I find something wrong or missing.</p>
+
+<h2>Personal</h2>
+
+<p>While doing all the above I will also try to spend more time off the computer. 2011 has been a great year when it comes to work and I hope that 2012 will be an equally great year but with one big difference, not that much overtime but instead spending more time with my lovely family without a macbook pro in my lap.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Grails mongoDB - Collections of DBRefs inside an Embedded Collection]]></title>
+    <link href="http://andreasarledal.github.com/blog/2011/11/15/grails-mongodb---collections-of-dbrefs-inside-an-embedded-collection/"/>
+    <updated>2011-11-15T09:39:00+01:00</updated>
+    <id>http://andreasarledal.github.com/blog/2011/11/15/grails-mongodb&#8212;collections-of-dbrefs-inside-an-embedded-collection</id>
+    <content type="html"><![CDATA[<p>I&#8217;m working on a project where we&#8217;re migrating from MySQL to mongoDB. One of the reasons for the switch is that the use of embedded collections will simplify our model and make it more efficient. The official mongodb-plugin (1.0.0.RC1) has some problems before it will be ready for production though. One of the problems is that having an embedded collection referencing another collection isn&#8217;t possible with GORM (<a href="http://jira.grails.org/browse/GPMONGODB-92" title="Associations in an embedded instance should not be forcibly embedded as well">GPMONGODB-92</a>). The workaround is to use the Low-level API instead of GORM. Here&#8217;s a simple example where a building has many offices and the offices has companies, but the companies need to be in an own collection since we need the possibility to query them specificaly.</p>
+
+<!--more-->
+
+
+<p><em>Only tested with Grails 2.0.0.RC1 and mongodb plugin 1.0.0.RC1</em></p>
+
+<figure class='code'><figcaption><span>Person  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="kn">import</span> <span class="nn">groovy.transform.EqualsAndHashCode</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.bson.types.ObjectId</span>
+</span><span class='line'>
+</span><span class='line'><span class="nd">@EqualsAndHashCode</span>
+</span><span class='line'><span class="kd">class</span> <span class="nc">Building</span> <span class="kd">implements</span> <span class="n">Serializable</span> <span class="o">{</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="kd">static</span> <span class="n">mapWith</span> <span class="o">=</span> <span class="s1">&#39;mongo&#39;</span>  
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">static</span> <span class="n">embedded</span> <span class="o">=</span> <span class="o">[</span><span class="s1">&#39;offices&#39;</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">ObjectId</span> <span class="n">id</span>
+</span><span class='line'>  <span class="n">String</span> <span class="n">name</span>
+</span><span class='line'>  <span class="n">List</span><span class="o">&lt;</span><span class="n">Office</span><span class="o">&gt;</span> <span class="n">offices</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>Office  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="kn">import</span> <span class="nn">groovy.transform.EqualsAndHashCode</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">com.mongodb.DBRef</span>
+</span><span class='line'>
+</span><span class='line'><span class="nd">@EqualsAndHashCode</span>
+</span><span class='line'><span class="kd">class</span> <span class="nc">Office</span> <span class="kd">implements</span> <span class="n">Serializable</span> <span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">String</span> <span class="n">name</span>
+</span><span class='line'>  <span class="n">List</span><span class="o">&lt;</span><span class="n">DBRef</span><span class="o">&gt;</span> <span class="n">companies</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>Company  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="kn">import</span> <span class="nn">groovy.transform.EqualsAndHashCode</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.bson.types.ObjectId</span>
+</span><span class='line'>
+</span><span class='line'><span class="nd">@EqualsAndHashCode</span>
+</span><span class='line'><span class="kd">class</span> <span class="nc">Company</span> <span class="kd">implements</span> <span class="n">Serializable</span> <span class="o">{</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="kd">static</span> <span class="n">mapWith</span> <span class="o">=</span> <span class="s1">&#39;mongo&#39;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">ObjectId</span> <span class="n">id</span>
+</span><span class='line'>  <span class="n">String</span> <span class="n">name</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>Testscript  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="kn">import</span> <span class="nn">com.mongodb.DBRef</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">com.gmongo.GMongo</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">def</span> <span class="n">mongo</span> <span class="o">=</span> <span class="k">new</span> <span class="n">GMongo</span><span class="o">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="o">,</span> <span class="mi">27017</span><span class="o">)</span>
+</span><span class='line'><span class="c1">// Get a db reference in the old fashion way. Could use def mongo inside of a controller or service.</span>
+</span><span class='line'><span class="kt">def</span> <span class="n">db</span> <span class="o">=</span> <span class="n">mongo</span><span class="o">.</span><span class="na">getDB</span><span class="o">(</span><span class="s2">&quot;foo&quot;</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Create a building </span>
+</span><span class='line'><span class="kt">def</span> <span class="n">building</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Building</span><span class="o">(</span><span class="nl">name:</span> <span class="s2">&quot;Stockholm business centre&quot;</span><span class="o">,</span> <span class="nl">offices:</span> <span class="o">[]).</span><span class="na">save</span><span class="o">()</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Add someone elses office</span>
+</span><span class='line'><span class="n">building</span><span class="o">.</span><span class="na">offices</span> <span class="o">&lt;&lt;</span> <span class="k">new</span> <span class="n">Office</span><span class="o">(</span><span class="nl">name:</span> <span class="s2">&quot;Bill Gates not so cool workplace&quot;</span><span class="o">,</span> <span class="nl">companies:</span> <span class="o">[])</span>
+</span><span class='line'><span class="c1">// Add my office</span>
+</span><span class='line'><span class="n">building</span><span class="o">.</span><span class="na">offices</span> <span class="o">&lt;&lt;</span> <span class="k">new</span> <span class="n">Office</span><span class="o">(</span><span class="nl">name:</span> <span class="s2">&quot;Andreas awesome workplace&quot;</span><span class="o">,</span> <span class="nl">companies:</span> <span class="o">[])</span>
+</span><span class='line'><span class="n">building</span><span class="o">.</span><span class="na">save</span><span class="o">(</span><span class="nl">flush:</span> <span class="kc">true</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Create a company</span>
+</span><span class='line'><span class="kt">def</span> <span class="n">company</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Company</span><span class="o">(</span><span class="nl">name:</span> <span class="s2">&quot;Andreas inc&quot;</span><span class="o">).</span><span class="na">save</span><span class="o">()</span>
+</span><span class='line'><span class="c1">// Get the reference</span>
+</span><span class='line'><span class="kt">def</span> <span class="n">companyRef</span> <span class="o">=</span> <span class="k">new</span> <span class="n">DBRef</span><span class="o">(</span><span class="n">db</span><span class="o">,</span> <span class="s2">&quot;company&quot;</span><span class="o">,</span> <span class="n">company</span><span class="o">.</span><span class="na">id</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Add company to office. </span>
+</span><span class='line'><span class="n">Building</span><span class="o">.</span><span class="na">collection</span><span class="o">.</span><span class="na">update</span><span class="o">([</span><span class="s1">&#39;_id&#39;</span><span class="o">:</span> <span class="n">building</span><span class="o">.</span><span class="na">id</span><span class="o">,</span> <span class="s1">&#39;offices.name&#39;</span><span class="o">:</span> <span class="s1">&#39;Andreas awesome workplace&#39;</span><span class="o">],</span> <span class="o">[</span><span class="n">$set</span><span class="o">:</span> <span class="o">[</span><span class="s1">&#39;offices.$.companies&#39;</span><span class="o">:</span> <span class="o">[</span><span class="n">companyRef</span><span class="o">]]])</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// QUERYING</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Since the embedded collection doesn&#39;t have an identifier, find it&#39;s index in the list.</span>
+</span><span class='line'><span class="kt">def</span> <span class="n">myOfficeIndex</span> <span class="o">=</span> <span class="n">building</span><span class="o">.</span><span class="na">offices</span><span class="o">.</span><span class="na">findIndexOf</span> <span class="o">{</span> <span class="n">it</span><span class="o">.</span><span class="na">name</span> <span class="o">==</span> <span class="s2">&quot;Andreas&#39;s awesome workplace&quot;</span><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// The DBRef isn&#39;t available in GORM even though it&#39;s persisted</span>
+</span><span class='line'><span class="k">assert</span> <span class="n">building</span><span class="o">.</span><span class="na">offices</span><span class="o">[</span><span class="n">myOfficeIndex</span><span class="o">].</span><span class="na">companies</span> <span class="o">==</span> <span class="o">[]</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Finding companies through the embedded collection using low level api.</span>
+</span><span class='line'><span class="kt">def</span> <span class="n">myOfficeCompanies</span> <span class="o">=</span> <span class="n">Building</span><span class="o">.</span><span class="na">collection</span><span class="o">.</span><span class="na">findOne</span><span class="o">(</span><span class="s1">&#39;_id&#39;</span><span class="o">:</span> <span class="n">building</span><span class="o">.</span><span class="na">id</span><span class="o">).</span><span class="na">offices</span><span class="o">[</span><span class="n">myOfficeIndex</span><span class="o">].</span><span class="na">companies</span>
+</span><span class='line'><span class="k">assert</span> <span class="n">company</span><span class="o">.</span><span class="na">id</span> <span class="k">in</span> <span class="n">myOfficeCompanies</span><span class="o">*.</span><span class="na">id</span>
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
+  
+</feed>
