@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: Groovy | Andreas Arledal]]></title>
-  <link href="http://andreasarledal.github.com/blog/categories/groovy/atom.xml" rel="self"/>
-  <link href="http://andreasarledal.github.com/"/>
-  <updated>2012-01-15T12:12:19+01:00</updated>
-  <id>http://andreasarledal.github.com/</id>
+  <link href="http://AndreasArledal.github.com/blog/categories/groovy/atom.xml" rel="self"/>
+  <link href="http://AndreasArledal.github.com/"/>
+  <updated>2012-01-16T21:04:51+01:00</updated>
+  <id>http://AndreasArledal.github.com/</id>
   <author>
     <name><![CDATA[Andreas Arledal]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Gr8 expectations]]></title>
-    <link href="http://andreasarledal.github.com/blog/2012/01/15/gr8-expectations/"/>
+    <link href="http://AndreasArledal.github.com/blog/2012/01/15/gr8-expectations/"/>
     <updated>2012-01-15T10:27:00+01:00</updated>
-    <id>http://andreasarledal.github.com/blog/2012/01/15/gr8-expectations</id>
+    <id>http://AndreasArledal.github.com/blog/2012/01/15/gr8-expectations</id>
     <content type="html"><![CDATA[<p>It's a little late for new years resolutions, but I have some promises to myself for this year strongly connected to this blog and my life as a developer. One of my biggest goals for the year is to take the next step in being a more active contributor to the groovy and grails community. To put the pressure on myself I decided to share those goals here, so here they are:</p>
 
 <!--more-->

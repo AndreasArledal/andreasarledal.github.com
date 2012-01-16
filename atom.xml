@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Andreas Arledal]]></title>
-  <link href="http://andreasarledal.github.com/atom.xml" rel="self"/>
-  <link href="http://andreasarledal.github.com/"/>
-  <updated>2012-01-15T12:12:19+01:00</updated>
-  <id>http://andreasarledal.github.com/</id>
+  <link href="http://AndreasArledal.github.com/atom.xml" rel="self"/>
+  <link href="http://AndreasArledal.github.com/"/>
+  <updated>2012-01-16T21:04:51+01:00</updated>
+  <id>http://AndreasArledal.github.com/</id>
   <author>
     <name><![CDATA[Andreas Arledal]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Gr8 expectations]]></title>
-    <link href="http://andreasarledal.github.com/blog/2012/01/15/gr8-expectations/"/>
+    <link href="http://AndreasArledal.github.com/blog/2012/01/15/gr8-expectations/"/>
     <updated>2012-01-15T10:27:00+01:00</updated>
-    <id>http://andreasarledal.github.com/blog/2012/01/15/gr8-expectations</id>
+    <id>http://AndreasArledal.github.com/blog/2012/01/15/gr8-expectations</id>
     <content type="html"><![CDATA[<p>It&#8217;s a little late for new years resolutions, but I have some promises to myself for this year strongly connected to this blog and my life as a developer. One of my biggest goals for the year is to take the next step in being a more active contributor to the groovy and grails community. To put the pressure on myself I decided to share those goals here, so here they are:</p>
 
 <!--more-->
@@ -55,9 +55,9 @@
   
   <entry>
     <title type="html"><![CDATA[Grails mongoDB - Collections of DBRefs inside an Embedded Collection]]></title>
-    <link href="http://andreasarledal.github.com/blog/2011/11/15/grails-mongodb---collections-of-dbrefs-inside-an-embedded-collection/"/>
+    <link href="http://AndreasArledal.github.com/blog/2011/11/15/grails-mongodb---collections-of-dbrefs-inside-an-embedded-collection/"/>
     <updated>2011-11-15T09:39:00+01:00</updated>
-    <id>http://andreasarledal.github.com/blog/2011/11/15/grails-mongodb&#8212;collections-of-dbrefs-inside-an-embedded-collection</id>
+    <id>http://AndreasArledal.github.com/blog/2011/11/15/grails-mongodb&#8212;collections-of-dbrefs-inside-an-embedded-collection</id>
     <content type="html"><![CDATA[<p>I&#8217;m working on a project where we&#8217;re migrating from MySQL to mongoDB. One of the reasons for the switch is that the use of embedded collections will simplify our model and make it more efficient. The official mongodb-plugin (1.0.0.RC1) has some problems before it will be ready for production though. One of the problems is that having an embedded collection referencing another collection isn&#8217;t possible with GORM (<a href="http://jira.grails.org/browse/GPMONGODB-92" title="Associations in an embedded instance should not be forcibly embedded as well">GPMONGODB-92</a>). The workaround is to use the Low-level API instead of GORM. Here&#8217;s a simple example where a building has many offices and the offices has companies, but the companies need to be in an own collection since we need the possibility to query them specificaly.</p>
 
 <!--more-->
