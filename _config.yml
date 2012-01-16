@@ -2,7 +2,7 @@
 #      Main Configs       #
 # ----------------------- #
 
-url: http://andreasarledal.github.com
+url: http://AndreasArledal.github.com
 title: Andreas Arledal
 subtitle: Writing about Groovy and Grails.
 author: Andreas Arledal
@@ -92,7 +92,7 @@ disqus_short_name: andreasarledal
 disqus_show_comment_count: false
 
 # Google Analytics
-google_analytics_tracking_id:
+google_analytics_tracking_id: UA-27056753-1
 
 # Facebook Like
 facebook_like: false
