@@ -1,0 +1,12 @@
+<div class="highlight"><pre><span class="kn">import</span> <span class="nn">groovy.transform.EqualsAndHashCode</span>
+<span class="kn">import</span> <span class="nn">com.mongodb.DBRef</span><span class="o">&lt;</span><span class="s">/p&gt;</span>
+
+<span class="s">&lt;p&gt;@EqualsAndHashCode</span>
+<span class="s">class Office implements Serializable {&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>  <span class="n">String</span> <span class="n">name</span>
+  <span class="n">List</span><span class="o">&lt;</span><span class="n">DBRef</span><span class="o">&gt;</span> <span class="n">companies</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;}</span>
+</pre>
+</div>

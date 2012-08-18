@@ -1,0 +1,38 @@
+<div class="highlight"><pre><span class="kn">import</span> <span class="nn">com.mongodb.DBRef</span>
+<span class="kn">import</span> <span class="nn">com.gmongo.GMongo</span>
+
+<span class="kt">def</span> <span class="n">mongo</span> <span class="o">=</span> <span class="k">new</span> <span class="n">GMongo</span><span class="o">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="o">,</span> <span class="mi">27017</span><span class="o">)</span>
+<span class="c1">// Get a db reference in the old fashion way. Could use def mongo inside of a controller or service.</span>
+<span class="kt">def</span> <span class="n">db</span> <span class="o">=</span> <span class="n">mongo</span><span class="o">.</span><span class="na">getDB</span><span class="o">(</span><span class="s2">&quot;foo&quot;</span><span class="o">)</span>
+
+<span class="c1">// Create a building </span>
+<span class="kt">def</span> <span class="n">building</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Building</span><span class="o">(</span><span class="nl">name:</span> <span class="s2">&quot;Stockholm business centre&quot;</span><span class="o">,</span> <span class="nl">offices:</span> <span class="o">[]).</span><span class="na">save</span><span class="o">()</span>
+
+<span class="c1">// Add someone elses office</span>
+<span class="n">building</span><span class="o">.</span><span class="na">offices</span> <span class="o">&lt;&lt;</span> <span class="k">new</span> <span class="n">Office</span><span class="o">(</span><span class="nl">name:</span> <span class="s2">&quot;Bill Gates not so cool workplace&quot;</span><span class="o">,</span> <span class="nl">companies:</span> <span class="o">[])</span>
+<span class="c1">// Add my office</span>
+<span class="n">building</span><span class="o">.</span><span class="na">offices</span> <span class="o">&lt;&lt;</span> <span class="k">new</span> <span class="n">Office</span><span class="o">(</span><span class="nl">name:</span> <span class="s2">&quot;Andreas awesome workplace&quot;</span><span class="o">,</span> <span class="nl">companies:</span> <span class="o">[])</span>
+<span class="n">building</span><span class="o">.</span><span class="na">save</span><span class="o">(</span><span class="nl">flush:</span> <span class="kc">true</span><span class="o">)</span>
+
+<span class="c1">// Create a company</span>
+<span class="kt">def</span> <span class="n">company</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Company</span><span class="o">(</span><span class="nl">name:</span> <span class="s2">&quot;Andreas inc&quot;</span><span class="o">).</span><span class="na">save</span><span class="o">()</span>
+<span class="c1">// Get the reference</span>
+<span class="kt">def</span> <span class="n">companyRef</span> <span class="o">=</span> <span class="k">new</span> <span class="n">DBRef</span><span class="o">(</span><span class="n">db</span><span class="o">,</span> <span class="s2">&quot;company&quot;</span><span class="o">,</span> <span class="n">company</span><span class="o">.</span><span class="na">id</span><span class="o">)</span>
+
+<span class="c1">// Add company to office. </span>
+<span class="n">Building</span><span class="o">.</span><span class="na">collection</span><span class="o">.</span><span class="na">update</span><span class="o">([</span><span class="s1">&#39;_id&#39;</span><span class="o">:</span> <span class="n">building</span><span class="o">.</span><span class="na">id</span><span class="o">,</span> <span class="s1">&#39;offices.name&#39;</span><span class="o">:</span> <span class="s1">&#39;Andreas awesome workplace&#39;</span><span class="o">],</span> <span class="o">[</span><span class="n">$set</span><span class="o">:</span> <span class="o">[</span><span class="s1">&#39;offices.$.companies&#39;</span><span class="o">:</span> <span class="o">[</span><span class="n">companyRef</span><span class="o">]]])</span>
+
+
+<span class="c1">// QUERYING</span>
+
+<span class="c1">// Since the embedded collection doesn&#39;t have an identifier, find it&#39;s index in the list.</span>
+<span class="kt">def</span> <span class="n">myOfficeIndex</span> <span class="o">=</span> <span class="n">building</span><span class="o">.</span><span class="na">offices</span><span class="o">.</span><span class="na">findIndexOf</span> <span class="o">{</span> <span class="n">it</span><span class="o">.</span><span class="na">name</span> <span class="o">==</span> <span class="s2">&quot;Andreas&#39;s awesome workplace&quot;</span><span class="o">}</span>
+
+<span class="c1">// The DBRef isn&#39;t available in GORM even though it&#39;s persisted</span>
+<span class="k">assert</span> <span class="n">building</span><span class="o">.</span><span class="na">offices</span><span class="o">[</span><span class="n">myOfficeIndex</span><span class="o">].</span><span class="na">companies</span> <span class="o">==</span> <span class="o">[]</span>
+
+<span class="c1">// Finding companies through the embedded collection using low level api.</span>
+<span class="kt">def</span> <span class="n">myOfficeCompanies</span> <span class="o">=</span> <span class="n">Building</span><span class="o">.</span><span class="na">collection</span><span class="o">.</span><span class="na">findOne</span><span class="o">(</span><span class="s1">&#39;_id&#39;</span><span class="o">:</span> <span class="n">building</span><span class="o">.</span><span class="na">id</span><span class="o">).</span><span class="na">offices</span><span class="o">[</span><span class="n">myOfficeIndex</span><span class="o">].</span><span class="na">companies</span>
+<span class="k">assert</span> <span class="n">company</span><span class="o">.</span><span class="na">id</span> <span class="k">in</span> <span class="n">myOfficeCompanies</span><span class="o">*.</span><span class="na">id</span>
+</pre>
+</div>

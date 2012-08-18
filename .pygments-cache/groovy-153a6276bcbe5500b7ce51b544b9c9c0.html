@@ -1,0 +1,17 @@
+<div class="highlight"><pre><span class="kn">import</span> <span class="nn">groovy.transform.EqualsAndHashCode</span>
+<span class="kn">import</span> <span class="nn">org.bson.types.ObjectId</span>
+
+<span class="nd">@EqualsAndHashCode</span>
+<span class="kd">class</span> <span class="nc">Building</span> <span class="kd">implements</span> <span class="n">Serializable</span> <span class="o">{</span>
+	
+  <span class="kd">static</span> <span class="n">mapWith</span> <span class="o">=</span> <span class="s1">&#39;mongo&#39;</span>	
+  
+  <span class="kd">static</span> <span class="n">embedded</span> <span class="o">=</span> <span class="o">[</span><span class="s1">&#39;offices&#39;</span><span class="o">]</span>
+  
+  <span class="n">ObjectId</span> <span class="n">id</span>
+  <span class="n">String</span> <span class="n">name</span>
+  <span class="n">List</span><span class="o">&lt;</span><span class="n">Office</span><span class="o">&gt;</span> <span class="n">offices</span>
+  
+<span class="o">}</span>
+</pre>
+</div>
